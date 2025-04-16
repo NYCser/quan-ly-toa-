@@ -1,8 +1,6 @@
 #include <Arduino.h>
 #include <SPI.h>
-#include <MFRC522.h>
-//Ngo Xuan Thuc
-
+#include <MFRC522.h
 #define SS_PIN 5
 #define RST_PIN 0
 
