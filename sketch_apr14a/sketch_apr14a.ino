@@ -4,6 +4,8 @@
 #define SS_PIN 5
 #define RST_PIN 0
 
+//Thuc
+
 MFRC522 rfid(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
 byte nuidPICC[4];
