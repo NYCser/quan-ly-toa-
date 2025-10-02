@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Smart Home Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 text-gray-800">
+    <!-- Thanh topbar -->
+    <header class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow-md">
+      <h1 class="text-2xl font-bold">🏠 Smart Home Dashboard</h1>
+      <span id="roleDisplay" class="text-sm bg-white/20 px-3 py-1 rounded">
+        ROLE: -
+      </span>
+    </header>
+
+    <!-- LOGIN SCREEN -->
+    <section id="loginScreen" class="screen flex items-center justify-center min-h-screen">
+      <div class="bg-white shadow-lg rounded-lg p-8 w-96">
+        <h2 class="text-xl font-semibold text-center mb-6">Đăng nhập</h2>
+        <input
+          type="text"
+          id="username"
+          placeholder="Username"
+          class="w-full border rounded px-3 py-2 mb-4 focus:outline-none focus:ring focus:ring-blue-300"
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          class="w-full border rounded px-3 py-2 mb-4 focus:outline-none focus:ring focus:ring-blue-300"
+        />
+        <button
+          onclick="login()"
+          class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        >
+          Login
+        </button>
+        <p id="loginError" class="text-red-500 text-sm mt-3 hidden">
+          Sai username hoặc password!
+        </p>
+      </div>
+    </section>
+
+    <!-- HOME SCREEN -->
+    <section id="homeScreen" class="screen hidden p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6 text-center">
+          <h2 class="text-lg font-semibold mb-2">⚡ Điện áp</h2>
+          <p id="voltage" class="text-2xl font-bold text-blue-600">-- V</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 text-center">
+          <h2 class="text-lg font-semibold mb-2">🔌 Dòng điện</h2>
+          <p id="current" class="text-2xl font-bold text-blue-600">-- A</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 text-center">
+          <h2 class="text-lg font-semibold mb-2">📊 Điện năng</h2>
+          <p id="energy" class="text-2xl font-bold text-blue-600">-- kWh</p>
+        </div>
+      </div>
+
+      <!-- Admin Controls -->
+      <div id="adminControls" class="hidden bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">👨‍💼 Quản lý phòng (Admin)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <input
+            type="text"
+            id="new-room-name"
+            placeholder="Tên phòng mới"
+            class="border rounded px-3 py-2"
+          />
+          <input type="number" id="temp-pin" placeholder="tempPin" class="border rounded px-3 py-2" />
+          <input type="number" id="light-pin" placeholder="lightPin" class="border rounded px-3 py-2" />
+          <input type="number" id="fan-pin" placeholder="fanPin" class="border rounded px-3 py-2" />
+        </div>
+        <div class="mt-4 flex gap-3">
+          <button
+            onclick="addRoom()"
+            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+          >
+            ➕ Add Room
+          </button>
+          <button
+            onclick="removeRoom()"
+            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+          >
+            ➖ Remove Room
+          </button>
+        </div>
+      </div>
+
+      <!-- Rooms Grid -->
+      <div id="roomsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+      <button
+        onclick="logout()"
+        class="mt-6 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition"
+      >
+        Logout
+      </button>
+    </section>
+
+    <!-- ROOM SCREEN -->
+    <section id="roomScreen" class="screen hidden p-6">
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 id="roomTitle" class="text-xl font-semibold mb-4">ROOM</h2>
+        <div id="roomDetail" class="mb-6 text-gray-700"></div>
+        <div class="grid grid-cols-2 gap-6">
+          <div class="flex flex-col items-center">
+            <span class="text-lg">💡 Đèn</span>
+            <button
+              id="btn-light"
+              onclick="toggleDevice('light')"
+              class="mt-2 px-6 py-2 rounded bg-gray-300 hover:bg-gray-400 transition"
+            >
+              Loading...
+            </button>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="text-lg">🌀 Quạt</span>
+            <button
+              id="btn-fan"
+              onclick="toggleDevice('fan')"
+              class="mt-2 px-6 py-2 rounded bg-gray-300 hover:bg-gray-400 transition"
+            >
+              Loading...
+            </button>
+          </div>
+        </div>
+      </div>
+      <button
+        onclick="openHome()"
+        class="mt-6 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition"
+      >
+        ⬅ Back
+      </button>
+    </section>
+
+    <footer class="text-center py-4 mt-6 text-sm text-gray-500">
+      Smart Home © 2025
+    </footer>
+
+    <script src="./main.js"></script>
+  </body>
+</html>

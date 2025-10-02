@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Smart Home Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Giả sử bạn có CSS, nếu không thì bỏ -->
+  </head>
+  <body>
+    <!-- Thanh topbar -->
+    <header class="navbar">
+      <h1>🏠 Smart Home Dashboard</h1>
+      <span id="roleDisplay">ROLE: -</span>
+    </header>
+
+    <!-- LOGIN SCREEN -->
+    <section id="loginScreen" class="screen">
+      <div class="card center">
+        <h2>LOGIN</h2>
+        <input type="text" id="username" placeholder="Username" />
+        <br />
+        <br />
+        <input type="password" id="password" placeholder="Password" />
+        <br />
+        <br />
+        <button onclick="login()">Login</button>
+        <p id="loginError" style="color: red; display: none">
+          Sai username hoặc password!
+        </p>
+      </div>
+    </section>
+
+    <!-- HOME SCREEN -->
+    <section id="homeScreen" class="screen hidden">
+      <div class="card">
+        <h2>POWER</h2>
+        <p>Điện áp: <span id="voltage">220V</span></p>
+        <p>Dòng điện: <span id="current">5A</span></p>
+        <p>Điện năng: <span id="energy">1.2 kWh</span></p>
+      </div>
+      <div id="adminControls" class="hidden">
+        <h3>Admin: Quản lý phòng</h3>
+        <input type="text" id="new-room-name" placeholder="Tên phòng mới" />
+        <br />
+        <input type="number" id="temp-pin" placeholder="tempPin" />
+        <input type="number" id="light-pin" placeholder="lightPin" />
+        <input type="number" id="fan-pin" placeholder="fanPin" />
+        <br /><br />
+        <button onclick="addRoom()">➕ Add Room</button>
+        <button onclick="removeRoom()">➖ Remove Room</button>
+      </div>
+      <div id="roomsGrid" class="room-grid"></div>
+      <button onclick="logout()" class="secondary">Logout</button>
+    </section>
+
+    <!-- ROOM SCREEN -->
+    <section id="roomScreen" class="screen hidden">
+      <div class="card">
+        <h2 id="roomTitle">ROOM</h2>
+        <div id="roomDetail">
+          <!-- Chi tiết phòng sẽ render ở đây -->
+        </div>
+        <div class="devices">
+          <div class="device">
+            <span>💡 Đèn</span>
+            <button id="btn-light" onclick="toggleDevice('light')">
+              Loading...
+            </button>
+          </div>
+          <div class="device">
+            <span>🌀 Quạt</span>
+            <button id="btn-fan" onclick="toggleDevice('fan')">
+              Loading...
+            </button>
+          </div>
+        </div>
+      </div>
+      <button onclick="openHome()" class="secondary">⬅ Back</button>
+    </section>
+
+    <footer>Smart Home © 2025</footer>
+    <script src="./main.js"></script>
+  </body>
+</html> 
