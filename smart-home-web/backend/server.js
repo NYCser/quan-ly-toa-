@@ -1,9 +1,9 @@
+// server.js
 import coap from "coap";
 import express from "express";
 import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
-import { sendCommandToESP32 } from "./coap_client.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +16,24 @@ app.use(express.static(path.join(__dirname, "../frontend")));
 
 let esp32Status = {};
 
-// HTTP server (frontend + API)
+// Hàm gửi lệnh qua CoAP
+function sendCommandToESP32(command) {
+  const req = coap.request({
+    hostname: "192.168.1.50", // IP ESP32 của bạn
+    port: 5683,
+    method: "POST",
+    pathname: "/esp32/control",
+  });
+
+  req.write(JSON.stringify(command));
+  req.end();
+
+  req.on("response", (res) => {
+    console.log("Response from ESP32:", res.code, res.payload.toString());
+  });
+}
+
+// HTTP API cho frontend
 app.get("/status", (req, res) => {
   res.json(esp32Status);
 });
@@ -44,11 +61,11 @@ app.post("/removeRoom", (req, res) => {
   res.status(200).json({ status: "sent" });
 });
 
-app.listen(PORT, () => {
-  console.log(`HTTP Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`HTTP Server running on http://0.0.0.0:${PORT}`);
 });
 
-// CoAP server để nhận trạng thái từ ESP32
+// CoAP server nhận trạng thái từ ESP32
 const coapServer = coap.createServer();
 
 coapServer.on("request", (req, res) => {

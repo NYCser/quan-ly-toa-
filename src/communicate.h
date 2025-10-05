@@ -7,9 +7,12 @@
 #include "home.h"
 
 // server CoAP
-#define COAP_SERVER_IP   "192.168.0.129"
+#define COAP_SERVER_IP   "192.168.1.30"
 #define COAP_SERVER_PORT 5683
-#define COAP_STATUS_PATH "/status"
+
+// CoAP path
+#define COAP_STATUS_PATH  "/esp32/status"
+#define COAP_CONTROL_PATH "/esp32/control"
 
 // CoAP client
 extern Coap coap;

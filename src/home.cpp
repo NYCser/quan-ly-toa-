@@ -16,14 +16,9 @@ void SmartHome_Init(SmartHome *home, int buttonPin)
     home->lcd->clear();
     home->lcd->setCursor(3, 0);
     home->lcd->print("Smart Home");
-    // while (!home->ina219->begin())
-    // {
-    //     Serial.println("Failed to find INA219 chip");
-    //     delay(10);
-    // }
+
     if (!home->ina219.begin())
     {
-        Serial.println("Failed to find INA219 chip");
         while (1)
         {
             delay(10);
@@ -60,7 +55,6 @@ bool SmartHome_AddRoom(SmartHome *home, const char *name,
         pinMode(lightPin, OUTPUT);
     if (fanPin >= 0)
         pinMode(fanPin, OUTPUT);
-    Serial.println("Added room: " + String(name));
     home->roomCount++;
     return true;
 }
@@ -99,19 +93,15 @@ void SmartHome_Update(SmartHome *home)
 {
     if (home->roomCount == 0)
         return;
-    Serial.println("Room count: " + String(home->roomCount));
     for (int i = 0; i < home->roomCount; i++)
     {
-        Serial.println("Updating temp & humi room " + String(i));
         home->rooms[i].temp = home->rooms[i].dht->readTemperature();
         home->rooms[i].humi = home->rooms[i].dht->readHumidity();
         if (isnan(home->rooms[i].temp) || isnan(home->rooms[i].humi))
         {
-            Serial.println("Failed to read from DHT sensor!");
             home->rooms[i].temp = 0;
-            home->rooms[i].humi = 0;    
+            home->rooms[i].humi = 0;
         }
-        Serial.println("Room " + String(i) + " - Temp: " + String(home->rooms[i].temp) + "C, Humi: " + String(home->rooms[i].humi) + "%");
     }
 
     // check nút đổi phòng
@@ -129,17 +119,6 @@ void SmartHome_Display(SmartHome *home)
     float busVoltage = home->ina219.getBusVoltage_V();
     float current_mA = home->ina219.getCurrent_mA();
     float power_mW = home->ina219.getPower_mW();
-
-    Serial.print("Bus Voltage:   ");
-    Serial.print(busVoltage);
-    Serial.println(" V");
-    Serial.print("Current:       ");
-    Serial.print(current_mA);
-    Serial.println(" mA");
-    Serial.print("Power:         ");
-    Serial.print(power_mW);
-    Serial.println(" mW");
-    Serial.println("");
 
     Room *room = &home->rooms[home->currentRoom];
 
