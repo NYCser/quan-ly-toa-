@@ -8,6 +8,7 @@ let historyDataCache = [];
 
 const HISTORY_REFRESH_INTERVAL = 10000;
 const UI_REFRESH_INTERVAL = 2000;
+let timeoutValue = 10000;
 
 // Dummy account list
 const accounts = {
@@ -455,3 +456,28 @@ setInterval(fetchStatus, UI_REFRESH_INTERVAL);
 fetchStatus();
 setInterval(loadAndDrawHistory, HISTORY_REFRESH_INTERVAL);
 loadAndDrawHistory();
+
+// Fetch timeout từ server khi load trang
+fetch("/api/timeout")
+  .then(res => res.json())
+  .then(data => timeoutValue = data.timeout);
+
+// Kiểm tra dữ liệu có bị lỗi thời không
+setInterval(() => {
+  fetch("/api/status")
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "stale") {
+        alert("Mất kết nối ESP32!");
+      }
+    });
+}, 2000); // kiểm tra mỗi 2s
+
+// Gửi thay đổi timeout từ người dùng
+function updateTimeout(newValue) {
+  fetch("/api/timeout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ timeout: newValue })
+  }).then(res => res.json()).then(console.log);
+}

@@ -69,8 +69,6 @@ void TaskComm(void *pvParameters)
         vTaskDelay(pdMS_TO_TICKS(500));
         Serial.print(".");
     }
-    Serial.println();
-    Serial.printf("WiFi connected on core %d\n", xPortGetCoreID());
     // Khởi tạo CoAP communication
     Serial.println("\nWiFi connected: " + WiFi.localIP().toString());
     Communicate_Init(&home);

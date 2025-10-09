@@ -13,6 +13,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
+let TIMEOUT_MS = 10000; // mặc định 10s
+let lastUpdateTime = Date.now();
+
 // Chỉ định static folder
 const staticPath = path.join(__dirname, "../frontend");
 console.log("Serving static files from:", staticPath);
@@ -118,12 +121,38 @@ app.listen(PORT, "0.0.0.0", () => {
 	console.log(`HTTP Server running on http://0.0.0.0:${PORT}`);
 });
 
+app.get("/api/timeout", (req, res) => {
+  res.json({ timeout: TIMEOUT_MS });
+});
+
+// REST API để frontend thay đổi timeout
+app.post("/api/timeout", (req, res) => {
+  const { timeout } = req.body;
+  if (typeof timeout === "number" && timeout > 1000) {
+    TIMEOUT_MS = timeout;
+    res.json({ status: "updated", timeout });
+  } else {
+    res.status(400).json({ error: "Invalid timeout value" });
+  }
+});
+
+// API kiểm tra trạng thái dữ liệu (cho frontend gọi định kỳ)
+app.get("/api/status", (req, res) => {
+  const elapsed = Date.now() - lastUpdateTime;
+  if (elapsed > TIMEOUT_MS) {
+    res.json({ status: "stale", elapsed });
+  } else {
+    res.json({ status: "ok", elapsed });
+  }
+});
+
 // CoAP server nhận trạng thái từ ESP32
 const coapServer = coap.createServer();
 
 coapServer.on("request", (req, res) => {
 	if (req.method === "PUT" && req.url === "/esp32/status") {
 		let payload = "";
+		lastUpdateTime = Date.now();
 
 		req.on("data", (chunk) => {
 			payload += chunk;
