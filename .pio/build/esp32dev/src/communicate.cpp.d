@@ -137,24 +137,8 @@
  .pio/libdeps/esp32dev/ArduinoJson/src/ArduinoJson.h \
  .pio/libdeps/esp32dev/ArduinoJson/src/ArduinoJson.hpp \
  .pio/libdeps/esp32dev/ArduinoJson/src/ArduinoJson/Configuration.hpp \
- .pio/libdeps/esp32dev/CoAP\ simple\ library/coap-simple.h \
- /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/Udp.h \
- src/home.h \
- /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src/Wire.h \
- /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h \
- .pio/libdeps/esp32dev/LiquidCrystal_I2C/LiquidCrystal_I2C.h \
- /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h \
- .pio/libdeps/esp32dev/Adafruit\ INA219/Adafruit_INA219.h \
- .pio/libdeps/esp32dev/Adafruit\ BusIO/Adafruit_BusIO_Register.h \
- .pio/libdeps/esp32dev/Adafruit\ BusIO/Adafruit_GenericDevice.h \
- .pio/libdeps/esp32dev/Adafruit\ BusIO/Adafruit_I2CDevice.h \
- .pio/libdeps/esp32dev/Adafruit\ BusIO/Adafruit_SPIDevice.h \
- /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src/SPI.h \
- /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
- .pio/libdeps/esp32dev/DHT\ sensor\ library/DHT.h src/FileSystem.h \
- /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS/src/SPIFFS.h \
- /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/FS/src/FS.h \
  /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFi.h \
+ /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h \
  /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/IPv6Address.h \
  /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiType.h \
  /home/namdhay/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_wifi/include/esp_wifi_types.h \
@@ -211,5 +195,19 @@
  /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiServer.h \
  /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/Server.h \
  /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiUdp.h \
+ /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/Udp.h \
  /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h \
- /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiUdp.h
+ .pio/libdeps/esp32dev/CoAP\ simple\ library/coap-simple.h src/home.h \
+ /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src/Wire.h \
+ /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h \
+ .pio/libdeps/esp32dev/LiquidCrystal_I2C/LiquidCrystal_I2C.h \
+ .pio/libdeps/esp32dev/Adafruit\ INA219/Adafruit_INA219.h \
+ .pio/libdeps/esp32dev/Adafruit\ BusIO/Adafruit_BusIO_Register.h \
+ .pio/libdeps/esp32dev/Adafruit\ BusIO/Adafruit_GenericDevice.h \
+ .pio/libdeps/esp32dev/Adafruit\ BusIO/Adafruit_I2CDevice.h \
+ .pio/libdeps/esp32dev/Adafruit\ BusIO/Adafruit_SPIDevice.h \
+ /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src/SPI.h \
+ /home/namdhay/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
+ .pio/libdeps/esp32dev/DHT\ sensor\ library/DHT.h src/FileSystem.h \
+ /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS/src/SPIFFS.h \
+ /home/namdhay/.platformio/packages/framework-arduinoespressif32/libraries/FS/src/FS.h

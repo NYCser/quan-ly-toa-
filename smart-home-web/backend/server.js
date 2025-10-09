@@ -16,9 +16,7 @@ const PORT = 3000;
 // Chỉ định static folder
 const staticPath = path.join(__dirname, "../frontend");
 console.log("Serving static files from:", staticPath);
-
 app.use(express.static(staticPath));
-
 app.use(bodyParser.json());
 
 let esp32Status = {};
@@ -33,55 +31,57 @@ const dbPromise = open({
 (async () => {
 	const db = await dbPromise;
 	await db.exec(`
-    CREATE TABLE IF NOT EXISTS sensor_data (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      room TEXT,
-      temp REAL,
-      humi REAL,
-      voltage REAL,
-      current REAL,
-      power REAL,
-      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+CREATE TABLE IF NOT EXISTS sensor_data (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+room TEXT,
+temp REAL,
+humi REAL,
+voltage REAL,
+current REAL,
+power REAL,
+timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+`);
 })();
+
+process.on("uncaughtException", (err) => {
+	console.error("UNCAUGHT EXCEPTION (will keep running):", err && err.stack ? err.stack : err);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+	console.error("UNHANDLED REJECTION (promise):", promise, "reason:", reason);
+});
 
 // Hàm gửi lệnh qua CoAP
 function sendCommandToESP32(command) {
 	const req = coap.request({
-		hostname: "192.168.1.50", // IP ESP32 của bạn
+		hostname: "192.168.1.5", // IP ESP32 của bạn
 		port: 5683,
 		method: "POST",
 		pathname: "/esp32/control",
 	});
 
-	req.write(JSON.stringify(command));
+	console.log("Sending command to ESP32:", command);
+	const json = JSON.stringify(command);
+	if (json.length > 512) {
+		console.warn("Payload too large, skipping CoAP send");
+		return;
+	}
+	req.write(json);
 	req.end();
 
 	req.on("response", (res) => {
-		console.log("Response from ESP32:", res.code, res.payload.toString());
+		console.log("Response from ESP32:", res.code, res.payload?.toString());
+	});
+
+	req.on("error", (err) => {
+		console.error("CoAP request error:", err);
 	});
 }
 
 // HTTP API cho frontend
 app.get("/status", (req, res) => {
-	// res.json(esp32Status);
-	res.json({
-		voltage: 28.0,
-		current: 65.0,
-		power: 12.5,
-		rooms: [
-			{ name: "Bed Room Floor 1", temp: 25, humi: 50, fan: "ON", light: "OFF" },
-			{
-				name: "Bed Room Floor 2",
-				temp: 27,
-				humi: 45,
-				fan: "OFF",
-				light: "OFF",
-			},
-			{ name: "Living Room", temp: 30, humi: 30, fan: "OFF", light: "ON" },
-		],
-	});
+	res.json(esp32Status);
 });
 
 // API trả về dữ liệu lịch sử
@@ -100,25 +100,17 @@ app.get("/history", async (req, res) => {
 });
 
 app.post("/control", (req, res) => {
-	const command = req.body;
-	console.log("Send command to ESP32:", command);
-	sendCommandToESP32(command);
+	sendCommandToESP32(req.body);
 	res.status(200).json({ status: "sent" });
 });
 
 app.post("/addRoom", (req, res) => {
-	const room = req.body;
-	const command = { action: "add", room };
-	console.log("Add room command to ESP32:", command);
-	sendCommandToESP32(command);
+	sendCommandToESP32(req.body); // không bọc thêm action/room
 	res.status(200).json({ status: "sent" });
 });
 
 app.post("/removeRoom", (req, res) => {
-	const roomName = req.body.roomName;
-	const command = { action: "remove", roomName };
-	console.log("Remove room command to ESP32:", command);
-	sendCommandToESP32(command);
+	sendCommandToESP32({ action: "remove", roomName: req.body.roomName });
 	res.status(200).json({ status: "sent" });
 });
 
@@ -132,8 +124,13 @@ const coapServer = coap.createServer();
 coapServer.on("request", (req, res) => {
 	if (req.method === "PUT" && req.url === "/esp32/status") {
 		let payload = "";
+
 		req.on("data", (chunk) => {
 			payload += chunk;
+		});
+
+		req.on("error", (err) => {
+			console.error("CoAP request stream error:", err);
 		});
 
 		req.on("end", async () => {
@@ -175,20 +172,24 @@ VALUES (?, ?, ?, ?, ?, ?)
 				}
 
 				res.code = "2.04"; // Changed
-				res.end(); // Không cần 'OK' trong response code 2.04
+				res.end("OK");
 			} catch (e) {
 				// await db.run('ROLLBACK'); // Nếu dùng transaction
 				console.error("Error processing CoAP payload or inserting to DB:", e);
-				res.code = "4.00"; // Bad Request
-				res.end("Invalid JSON or DB error");
+				res.code = "4.04";
+				res.end("Not Found");
 			}
 		});
 	} else {
-		res.code = "4.04"; // Not Found
-		res.end("Not Found");
+		res.code = "5.00";
+		res.end("Server Error");
 	}
 });
 
-coapServer.listen(() => {
-	console.log("CoAP Server listening on port 5683");
+coapServer.listen(5683, "0.0.0.0", () => {
+	console.log("CoAP Server listening on 0.0.0.0:5683");
+});
+
+coapServer.on("error", (err) => {
+	console.error("❌ CoAP server error:", err);
 });

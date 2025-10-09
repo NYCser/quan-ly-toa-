@@ -133,18 +133,19 @@ void SmartHome_RemoveRoom(SmartHome *home, const char *name)
             break;
         }
     }
+    SmartHome_SaveConfig(home, FILE_CONFIG);
 }
 
 void SmartHome_ControlDevice(Room *room, const char *device, bool state)
 {
     if (strcmp(device, "light") == 0 && room->lightPin >= 0)
     {
-        digitalWrite(room->lightPin, state ? HIGH : LOW);
+        digitalWrite(room->lightPin, state ? LOW : HIGH);
         room->lightState = state;
     }
     if (strcmp(device, "fan") == 0 && room->fanPin >= 0)
     {
-        digitalWrite(room->fanPin, state ? HIGH : LOW);
+        digitalWrite(room->fanPin, state ? LOW : HIGH);
         room->fanState = state;
     }
 }
@@ -155,45 +156,60 @@ void SmartHome_Update(SmartHome *home)
         return;
     for (int i = 0; i < home->roomCount; i++)
     {
-        home->rooms[i].temp = home->rooms[i].dht->readTemperature();
-        home->rooms[i].humi = home->rooms[i].dht->readHumidity();
-        if (isnan(home->rooms[i].temp) || isnan(home->rooms[i].humi))
+        if (home->rooms[i].dht != NULL)
+        {
+            home->rooms[i].temp = home->rooms[i].dht->readTemperature();
+            home->rooms[i].humi = home->rooms[i].dht->readHumidity();
+            if (isnan(home->rooms[i].temp) || isnan(home->rooms[i].humi))
+            {
+                home->rooms[i].temp = 0;
+                home->rooms[i].humi = 0;
+            }
+        }
+        else
         {
             home->rooms[i].temp = 0;
             home->rooms[i].humi = 0;
         }
     }
 
-    // check nút đổi phòng
-    // if (digitalRead(home->buttonPin) == LOW)
-    // {
-    //     SmartHome_NextRoom(home);
-    // }
+    if (digitalRead(home->buttonPin) == LOW)
+    {
+        SmartHome_NextRoom(home);
+    }
 }
 
 void SmartHome_Display(SmartHome *home)
 {
-    if (home->roomCount == 0)
-        return;
-
     float busVoltage = home->ina219.getBusVoltage_V();
     float current_mA = home->ina219.getCurrent_mA();
     float power_mW = home->ina219.getPower_mW();
 
-    Room *room = &home->rooms[home->currentRoom];
-
-    home->lcd->clear();
+    home->lcd->setCursor(0, 0);
+    home->lcd->print("   ");
     home->lcd->setCursor(0, 0);
     home->lcd->print(busVoltage, 1);
-    home->lcd->print("V ");
+    home->lcd->setCursor(5, 0);
+    home->lcd->print("   ");
+    home->lcd->setCursor(5, 0);
     home->lcd->print(current_mA, 0);
-    home->lcd->print("mA");
+
+    if (home->roomCount == 0)
+        return;
+        
+    Room *room = &home->rooms[home->currentRoom];
 
     home->lcd->setCursor(0, 1);
+    home->lcd->print("     ");
+    home->lcd->setCursor(0, 1);
     home->lcd->print(room->name);
-    home->lcd->print(" T:");
+    home->lcd->setCursor(8, 1);
+    home->lcd->print("  ");
+    home->lcd->setCursor(8, 1);
     home->lcd->print(room->temp, 0);
-    home->lcd->print("C H:");
+    home->lcd->setCursor(14, 1);
+    home->lcd->print("  ");
+    home->lcd->setCursor(14, 1);
     home->lcd->print(room->humi, 0);
 }
 

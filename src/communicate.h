@@ -3,22 +3,23 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <WiFi.h>
+
+#define COAP_BUF_MAX_SIZE 512
+
 #include <coap-simple.h>
 #include "home.h"
 
-// server CoAP
-#define COAP_SERVER_IP   "192.168.1.30"
-#define COAP_SERVER_PORT 5683
 
 // CoAP path
-#define COAP_STATUS_PATH  "/esp32/status"
-#define COAP_CONTROL_PATH "/esp32/control"
-
-// CoAP client
-extern Coap coap;
+#define COAP_STATUS_PATH  "esp32/status"
+#define COAP_CONTROL_PATH "esp32/control"
 
 // init module
 void Communicate_Init(SmartHome* home);
+
+// vòng lặp xử lý CoAP
+void Communicate_Loop();
 
 // gửi trạng thái SmartHome lên backend
 void Communicate_SendStatus(SmartHome* home);

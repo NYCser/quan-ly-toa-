@@ -5,8 +5,9 @@ let role = "guest";
 let mainPowerChart = null;
 let roomTempHumiChart = null;
 let historyDataCache = [];
-const HISTORY_REFRESH_INTERVAL = 30000;
-const UI_REFRESH_INTERVAL = 1000;
+
+const HISTORY_REFRESH_INTERVAL = 10000;
+const UI_REFRESH_INTERVAL = 2000;
 
 // Dummy account list
 const accounts = {
@@ -38,6 +39,7 @@ function login() {
 		document.getElementById("adminControls").classList.add("hidden");
 	}
 	fetchStatus();
+	loadAndDrawHistory();
 }
 
 // Đăng xuất
@@ -87,7 +89,11 @@ function drawRoomTempHumiChart(roomName, history) {
 
 	// Hủy đồ thị cũ nếu có
 	if (roomTempHumiChart) {
-		roomTempHumiChart.destroy();
+		roomTempHumiChart.data.labels = labels;
+		roomTempHumiChart.data.datasets[0].data = tempData;
+		roomTempHumiChart.data.datasets[1].data = humiData;
+		roomTempHumiChart.update();
+		return;
 	}
 
 	roomTempHumiChart = new Chart(ctx, {
@@ -112,6 +118,7 @@ function drawRoomTempHumiChart(roomName, history) {
 			],
 		},
 		options: {
+			animation: false,
 			responsive: true,
 			scales: {
 				Temp: {
@@ -170,11 +177,6 @@ function openHome() {
 	document.getElementById("homeScreen").classList.remove("hidden");
 	currentRoom = null;
 
-	if (roomTempHumiChart) {
-		roomTempHumiChart.destroy();
-		roomTempHumiChart = null;
-	}
-
 	drawMainPowerChart(historyDataCache);
 }
 
@@ -199,7 +201,12 @@ function drawMainPowerChart(history) {
 
 	// Hủy đồ thị cũ nếu có
 	if (mainPowerChart) {
-		mainPowerChart.destroy();
+		mainPowerChart.data.labels = labels;
+		mainPowerChart.data.datasets[0].data = voltageData;
+		mainPowerChart.data.datasets[1].data = currentData;
+		mainPowerChart.data.datasets[2].data = powerData;
+		mainPowerChart.update();
+		return;
 	}
 
 	mainPowerChart = new Chart(ctx, {
@@ -215,18 +222,18 @@ function drawMainPowerChart(history) {
 					yAxisID: "V",
 				},
 				{
-					label: "Dòng điện (A)",
+					label: "Dòng điện (mA)",
 					data: currentData,
 					borderColor: "rgb(255, 99, 132)", // Đỏ
 					tension: 0.1,
 					yAxisID: "A",
 				},
 				{
-					label: "Công suất (W)",
+					label: "Công suất (mW)",
 					data: powerData,
 					borderColor: "rgb(75, 192, 192)", // Xanh lá
 					tension: 0.1,
-					yAxisID: "W",
+					yAxisID: "mW",
 				},
 			],
 		},
@@ -242,13 +249,13 @@ function drawMainPowerChart(history) {
 				A: {
 					type: "linear",
 					position: "right",
-					title: { display: true, text: "Dòng điện (A)" },
+					title: { display: true, text: "Dòng điện (mA)" },
 					grid: { drawOnChartArea: false },
 				},
 				W: {
 					type: "linear",
 					position: "right",
-					title: { display: true, text: "Công suất (W)" },
+					title: { display: true, text: "Công suất (mW)" },
 					grid: { drawOnChartArea: false },
 				},
 			},
@@ -428,15 +435,19 @@ async function updateUI(data) {
 	document.getElementById("voltage").textContent =
 		`${data.voltage?.toFixed(1) ?? "-"} V`;
 	document.getElementById("current").textContent =
-		`${data.current?.toFixed(1) ?? "-"} A`;
+		`${data.current?.toFixed(1) ?? "-"} mA`;
 	document.getElementById("energy").textContent =
-		`${data.power?.toFixed(1) ?? "-"} W`; // Thay kWh bằng W (Công suất tức thời)
+		`${data.power?.toFixed(1) ?? "-"} mW`; // Thay kWh bằng W (Công suất tức thời)
 
 	renderRooms();
 
 	// Nếu đang mở phòng, cập nhật lại UI phòng
 	if (currentRoom) {
-		openRoom(currentRoom);
+		const room = data.rooms.find(r => r.name === currentRoom);
+		if (room) {
+			document.querySelector("#roomScreen .bg-red-50 span:nth-child(2)").textContent = `${room.temp?.toFixed(1) ?? "-"}°C`;
+			document.querySelector("#roomScreen .bg-blue-50 span:nth-child(2)").textContent = `${room.humi?.toFixed(1) ?? "-"}%`;
+		}
 	}
 }
 

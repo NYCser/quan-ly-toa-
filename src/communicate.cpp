@@ -1,34 +1,45 @@
 #include "communicate.h"
-#include <WiFi.h>
-#include <WiFiUdp.h>
-#include <ArduinoJson.h>
 
-// dùng con trỏ toàn cục để callback truy cập SmartHome
-static SmartHome *g_home = NULL;
+// server CoAP
+#define COAP_SERVER_IP   "192.168.1.30"
+#define COAP_SERVER_PORT 5683
 
-// UDP transport cho CoAP
 WiFiUDP udp;
+Coap coap(udp);
 
-// CoAP client
-Coap coap(udp); // gán UDP vào Coap
+static SmartHome *g_home = NULL;
 
 void Communicate_Init(SmartHome *home)
 {
     g_home = home;
-    coap.start();
-    coap.response(MyCoapCallback);
+
+    while (!coap.start()) {
+        Serial.println("CoAP client start failed, retrying...");
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
     coap.server(MyCoapCallback, COAP_CONTROL_PATH);
-    Serial.println("CoAP client started");
+    coap.response(MyCoapCallback);
+    Serial.printf("CoAP start on core %d\n", xPortGetCoreID());
+    Serial.println("CoAP client started on port " +  String(COAP_SERVER_PORT));
+}
+
+void Communicate_Loop()
+{
+    coap.loop();
 }
 
 void Communicate_SendStatus(SmartHome *home)
 {
-    DynamicJsonDocument doc(256);
+    DynamicJsonDocument doc(128);
 
     doc["voltage"] = home->ina219.getBusVoltage_V();
     doc["current"] = home->ina219.getCurrent_mA();
     doc["power"]   = home->ina219.getPower_mW();
     JsonArray rooms = doc.createNestedArray("rooms");
+    if (home->roomCount ==  0) {
+        Serial.println("No room configured, not sending status");
+        goto send;
+    }
     for (int i = 0; i < home->roomCount; i++) {
         JsonObject roomObj = rooms.createNestedObject();
         roomObj["name"]  = home->rooms[i].name;
@@ -37,34 +48,34 @@ void Communicate_SendStatus(SmartHome *home)
         roomObj["light"] = home->rooms[i].lightState ? "ON" : "OFF";
         roomObj["fan"]   = home->rooms[i].fanState   ? "ON" : "OFF";
     }
-
-    char buffer[4096];
+send:
+    char buffer[256];
     size_t n = serializeJson(doc, buffer, sizeof(buffer));
-    Serial.println("Serialized JSON:");
-    Serial.println(buffer);
-    if (n >= sizeof(buffer)) {
-        Serial.println("JSON too large, skipping send!");
-        return;
-    }
 
+    String msg = String(buffer);
+    
     IPAddress ip;
     if (!ip.fromString(COAP_SERVER_IP)) {
         Serial.println("Invalid COAP_SERVER_IP");
         return;
     }
-    coap.put(ip, COAP_SERVER_PORT, COAP_STATUS_PATH, buffer, n);
+    int ret = coap.put(ip, COAP_SERVER_PORT, COAP_STATUS_PATH, msg.c_str());
+    Serial.println("Sending to " COAP_SERVER_IP ":" + String(COAP_SERVER_PORT) + " : " + msg + "(" + String(msg.length()) + " bytes)");
 }
 
 
 void Communicate_HandleCommand(const char *jsonStr, SmartHome *home)
 {
-    DynamicJsonDocument doc(256);
+    DynamicJsonDocument doc(128);
     DeserializationError err = deserializeJson(doc, jsonStr);
     if (err) {
         Serial.print("JSON parse error: ");
         Serial.println(err.c_str());
         return;
     }
+    Serial.println("Received command:");
+    serializeJsonPretty(doc, Serial);
+    Serial.println();
 
     // Xử lý action add/remove room
     if (doc.containsKey("action"))
@@ -117,10 +128,10 @@ void Communicate_HandleCommand(const char *jsonStr, SmartHome *home)
 // đổi tên callback để tránh conflict với typedef
 void MyCoapCallback(CoapPacket &packet, IPAddress ip, int port)
 {
-    Serial.print("CoAP message from ");
-    Serial.print(ip);
-    Serial.print(":");
-    Serial.println(port);
+    // Serial.print("CoAP message from ");
+    // Serial.print(ip);
+    // Serial.print(":");
+    // Serial.println(port);
 
     // copy payload sang buffer an toàn
     char payload[packet.payloadlen + 1];
@@ -144,6 +155,6 @@ void MyCoapCallback(CoapPacket &packet, IPAddress ip, int port)
                           packet.token, packet.tokenlen);
     }
     else {
-        Serial.println("Not a POST command, ignoring...");
+        // Serial.println("Not a POST command, ignoring...");
     }
 }

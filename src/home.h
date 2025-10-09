@@ -12,7 +12,7 @@
 #define MAX_NAME_LEN    16
 #define DHTTYPE         DHT11
 
-#define FILE_CONFIG     "../conf/config.json"
+#define FILE_CONFIG     "/config.json"
 
 #pragma pack(push, 1)
 typedef struct {
