@@ -109,10 +109,14 @@ bool SmartHome_AddRoom(SmartHome *home, const char *name,
         room->dht = NULL;
     }
 
-    if (lightPin >= 0)
+    if (lightPin >= 0) {
         pinMode(lightPin, OUTPUT);
-    if (fanPin >= 0)
+        digitalWrite(room->lightPin, state ? LOW : HIGH);
+    }
+    if (fanPin >= 0) {
         pinMode(fanPin, OUTPUT);
+        digitalWrite(room->fanPin, state ? LOW : HIGH);
+    }
     home->roomCount++;
 
     SmartHome_SaveConfig(home, FILE_CONFIG);
